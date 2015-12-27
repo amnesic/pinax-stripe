@@ -32,7 +32,12 @@ class Plan(StripeObject):
     trial_period_days = models.IntegerField(null=True)
 
     def __str__(self):
-        return "{} (${})".format(self.name, self.amount)
+        currency_symbol = self.currency
+        if self.currency == 'usd':
+            currency_symbol = '$'
+        elif self.currency == 'eur':
+            currency_symbol = '€'
+        return "{} ({} {}/{})".format(self.name, self.amount,currency_symbol, self.interval)
 
 
 @python_2_unicode_compatible
