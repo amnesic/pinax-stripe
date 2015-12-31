@@ -104,8 +104,12 @@ class SubscriptionCreateView(LoginRequiredMixin, PaymentsContextMixin, CustomerM
     def form_valid(self, form):
         self.set_customer()
         try:
-            self.subscribe(self.customer, plan=form.cleaned_data["plan"], token=self.request.POST.get("stripeToken"))
-            return redirect("pinax_stripe_subscription_list")
+            if subscriptions.has_active_subscription_for_plan(self.customer,form.cleaned_data["plan"]):
+                return self.render_to_response(self.get_context_data(form=form, errors=smart_str(
+                    "You already have this plan active")))
+            else:
+                self.subscribe(self.customer, plan=form.cleaned_data["plan"], token=self.request.POST.get("stripeToken"))
+                return redirect("payment_success")
         except stripe.StripeError as e:
             return self.render_to_response(self.get_context_data(form=form, errors=smart_str(e)))
 

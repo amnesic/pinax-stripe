@@ -57,6 +57,22 @@ def create(customer, plan, quantity=None, trial_days=None, token=None, coupon=No
 
     return resp
 
+def has_active_subscription_for_plan(customer,plan):
+    """
+    Checks if the given customer has an active subscription
+
+    Args:
+        customer: the customer to check
+
+    Returns:
+        True, if there is an active subscription, otherwise False
+    """
+    return models.Subscription.objects.filter(
+        customer=customer
+    ).filter(
+        Q(plan_id=plan.id) & ( Q(ended_at__isnull=True) | Q(ended_at__gt=timezone.now() ) )
+    ).exists()
+
 
 def has_active_subscription(customer):
     """
