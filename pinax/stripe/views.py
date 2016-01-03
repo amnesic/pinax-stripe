@@ -9,6 +9,7 @@ from django.views.generic.edit import FormMixin
 from django.views.decorators.csrf import csrf_exempt
 
 import stripe
+import time
 
 from .actions import events, exceptions, customers, subscriptions, sources
 from .forms import PlanForm
@@ -108,8 +109,22 @@ class SubscriptionCreateView(LoginRequiredMixin, PaymentsContextMixin, CustomerM
                 return self.render_to_response(self.get_context_data(form=form, errors=smart_str(
                     "You already have this plan active")))
             else:
-                self.subscribe(self.customer, plan=form.cleaned_data["plan"], token=self.request.POST.get("stripeToken"))
-                return redirect("payment_success")
+                current_timestamp = int(time.time())
+                str_older_timestamp = self.request.session.get('session_form_timestamp_submit', False)
+                if (str_older_timestamp is not None ) and (current_timestamp - int(str_older_timestamp)) < 10:
+                    print("to close submit duplicate")
+                    #return self.render_to_response(self.get_context_data(form=form, errors=smart_str("Waiting")))
+                    return redirect("payment_success")
+                else:
+                    self.request.session['session_form_timestamp_submit'] = str(current_timestamp)
+                    self.request.session.save()
+                    print("Start subscribe process")
+                    self.subscribe(self.customer, plan=form.cleaned_data["plan"], token=self.request.POST.get("stripeToken"))
+                    #time.sleep(2)
+                    print("End subscribe process")
+                    #del self.request.session['session_form_timestamp_submit']
+                    #self.request.session.save()
+                    return redirect("payment_success")
         except stripe.StripeError as e:
             return self.render_to_response(self.get_context_data(form=form, errors=smart_str(e)))
 
