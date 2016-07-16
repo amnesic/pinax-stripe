@@ -4,4 +4,5 @@ from .models import Plan
 
 
 class PlanForm(forms.Form):
-    plan = forms.ModelChoiceField(queryset=Plan.objects.all())
+    queryset = Plan.objects.exclude(statement_descriptor = "hidden")
+    plan = forms.ModelChoiceField(queryset)
