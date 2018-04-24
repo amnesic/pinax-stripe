@@ -6,7 +6,7 @@ import stripe
 
 from six import with_metaclass
 
-from .actions import charges, customers, exceptions, invoices, transfers, sources
+from .actions import charges, customers, exceptions, invoices, transfers, sources, subscriptions
 from .conf import settings
 
 
