@@ -5,4 +5,4 @@ from .models import Plan
 
 class PlanForm(forms.Form):
     queryset = Plan.objects.exclude(statement_descriptor = "hidden")
-    plan = forms.ModelChoiceField(queryset)
+    plan = forms.ModelChoiceField(queryset.order_by('id'))
